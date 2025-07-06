@@ -2,6 +2,23 @@
 
 declare exe=guru
 declare cmdname=
+declare color_reset="\e[0m"
+declare color_green="\e[92;1m"
+declare color_bold="\e[1m"
+
+detect-color () {
+    local colors=$(tput colors 2>/dev/null)
+
+    if test $? -ne 0 -o "$colors" -le 2; then
+        disable-color
+    fi
+}
+
+disable-color () {
+    color_reset=""
+    color_green=""
+    color_bold=""
+}
 
 error () {
     local status=${2:-1}
@@ -49,9 +66,10 @@ pkg-install () {
     local pkg_root="$1"
     local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
 
-    echo "installing $pkg_spec"
+    echo -e "${color_green}installing $pkg_spec${color_reset}"
     pkg-install-apt "$pkg_root" "$pkg_spec"
     pkg-install-bin "$pkg_root" "$pkg_spec"
+    echo -e "${color_bold}completed installing $pkg_spec${color_reset}"
 }
 
 pkg-install-apt () {
@@ -62,7 +80,7 @@ pkg-install-apt () {
         return
     fi
 
-    echo "installing system dependencies with APT"
+    echo -e "${color_bold}installing system dependencies with APT${color_reset}"
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         $(strip-comments < "$pkg_root/apt")
 }
@@ -75,7 +93,7 @@ pkg-install-bin () {
         return
     fi
 
-    echo "installing binaries"
+    echo -e "${color_bold}installing binaries${color_reset}"
     cp -vrT "$pkg_root/bin" /usr/local/bin
 }
 
@@ -100,16 +118,18 @@ usage () {
     echo "Options recognized:"
     echo "  --help      Show this help message."
     echo "  --list      List available commands."
+    echo "  --no-color  Disable color output."
 }
 
-eval set -- $(getopt -o "" --long help,list -n $exe -- "$@")
+eval set -- $(getopt -o "" --long help,list,no-color -n $exe -- "$@")
 
 while true; do
     case "$1" in
-        --help) usage; exit;;
-        --list) list-commands; exit;;
-        --)     shift; break;;
-        *)      break;;
+        --help)     usage;          exit;;
+        --list)     list-commands;  exit;;
+        --no-color) disable-color;;
+        --)         shift;          break;;
+        *)                          break;;
     esac
 done
 
@@ -117,6 +137,7 @@ cmdname="$1"
 
 if shift; then
     if type -p guru-"$cmdname" &>/dev/null; then
+        detect-color
         guru-"$cmdname" "$@"
     else
         error "'$cmdname' is not a $exe command.  Try '$exe --help'."
