@@ -22,6 +22,8 @@
 declare exe=guru
 declare cmd=
 declare prefix=/usr/local
+declare bin=$(dirname "$0")
+declare lib=$(dirname "$bin")/lib/guru
 
 detect-color () {
     local colors=$(tput colors 2>/dev/null)
@@ -84,6 +86,7 @@ pkg-install () {
 
     echo "$(style +b green)installing $pkg_spec$(style)"
     pkg-install-apt "$pkg_root" "$pkg_spec"
+    pkg-install-lib "$pkg_root" "$pkg_spec"
     pkg-install-bin "$pkg_root" "$pkg_spec"
     echo "$(style green)completed installing $pkg_spec$(style)"
 }
@@ -111,6 +114,18 @@ pkg-install-bin () {
 
     echo "$(style +bu white)installing binaries$(style)"
     cp -vrT "$pkg_root/bin" "$prefix/bin"
+}
+
+pkg-install-lib () {
+    local pkg_root="$1"
+    local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
+
+    if ! test -d "$pkg_root/lib"; then
+        return
+    fi
+
+    echo "$(style +bu white)installing libraries$(style)"
+    cp -vrT "$pkg_root/lib" "$prefix/lib"
 }
 
 pkg-verify () {
@@ -188,7 +203,8 @@ style () {
 }
 
 version () {
-    echo "$exe v0.0.0"
+    source "$lib/info" 2>/dev/null || true
+    echo "$exe v${guru_ver}"
 }
 
 usage () {
@@ -210,7 +226,7 @@ while true; do
     case "$1" in
         --help)     usage;              exit;;
         --list)     list-commands;      exit;;
-        --no-color) disable-color;;
+        --no-color) disable-color;      shift;;
         --prefix)   prefix="$2";        shift 2 || error "missing prefix";;
         --prefix=*) prefix="${1#*=}";   shift;;
         --version)  version;            exit;;
