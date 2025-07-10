@@ -2,9 +2,6 @@
 
 declare exe=guru
 declare cmdname=
-declare color_reset="\e[0m"
-declare color_green="\e[92;1m"
-declare color_bold="\e[1m"
 
 detect-color () {
     local colors=$(tput colors 2>/dev/null)
@@ -15,9 +12,8 @@ detect-color () {
 }
 
 disable-color () {
-    color_reset=""
-    color_green=""
-    color_bold=""
+    # override style function to be no-op
+    style () { :; }
 }
 
 error () {
@@ -66,10 +62,10 @@ pkg-install () {
     local pkg_root="$1"
     local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
 
-    echo -e "${color_green}installing $pkg_spec${color_reset}"
+    echo "$(style bold green)installing $pkg_spec$(style)"
     pkg-install-apt "$pkg_root" "$pkg_spec"
     pkg-install-bin "$pkg_root" "$pkg_spec"
-    echo -e "${color_bold}completed installing $pkg_spec${color_reset}"
+    echo "$(style green)completed installing $pkg_spec$(style)"
 }
 
 pkg-install-apt () {
@@ -80,7 +76,7 @@ pkg-install-apt () {
         return
     fi
 
-    echo -e "${color_bold}installing system dependencies with APT${color_reset}"
+    echo "$(style bold white underline)installing system dependencies with APT$(style)"
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         $(strip-comments < "$pkg_root/apt")
 }
@@ -93,7 +89,7 @@ pkg-install-bin () {
         return
     fi
 
-    echo -e "${color_bold}installing binaries${color_reset}"
+    echo "$(style bold white underline)installing binaries$(style)"
     cp -vrT "$pkg_root/bin" /usr/local/bin
 }
 
@@ -108,6 +104,38 @@ pkg-verify () {
 
 strip-comments () {
     grep -v ^\#
+}
+
+style () {
+    local -ia styles=()
+    local style
+
+    for style in "$@"; do
+        case "$style" in
+            bold)       styles+=(1);;
+            dim)        styles+=(2);;
+            italic)     styles+=(3);;
+            underline)  styles+=(4);;
+            -bold|-dim) styles+=(22);;
+            -italic)    styles+=(23);;
+            -underline) styles+=(24);;
+            black)      styles+=(30);;
+            red)        styles+=(31);;
+            green)      styles+=(32);;
+            yellow)     styles+=(33);;
+            blue)       styles+=(34);;
+            magenta)    styles+=(35);;
+            cyan)       styles+=(36);;
+            white)      styles+=(37);;
+            *)          error "argument '$style' is not a valid style";;
+        esac
+    done
+
+    if test ${#styles[@]} -eq 0; then
+        styles=(0)
+    fi
+
+    (IFS=\;; echo -e "\e[${styles[*]}m")
 }
 
 usage () {
