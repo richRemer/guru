@@ -63,7 +63,7 @@ pkg-install () {
     local pkg_root="$1"
     local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
 
-    echo "$(style bold green)installing $pkg_spec$(style)"
+    echo "$(style +b green)installing $pkg_spec$(style)"
     pkg-install-apt "$pkg_root" "$pkg_spec"
     pkg-install-bin "$pkg_root" "$pkg_spec"
     echo "$(style green)completed installing $pkg_spec$(style)"
@@ -77,7 +77,7 @@ pkg-install-apt () {
         return
     fi
 
-    echo "$(style bold white underline)installing system dependencies with APT$(style)"
+    echo "$(style +bu white)installing system dependencies with APT$(style)"
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         $(strip-comments < "$pkg_root/apt")
 }
@@ -90,7 +90,7 @@ pkg-install-bin () {
         return
     fi
 
-    echo "$(style bold white underline)installing binaries$(style)"
+    echo "$(style +bu white)installing binaries$(style)"
     cp -vrT "$pkg_root/bin" "$prefix/bin"
 }
 
@@ -120,22 +120,44 @@ style () {
 
     for style in "$@"; do
         case "$style" in
-            bold)       styles+=(1);;
-            dim)        styles+=(2);;
-            italic)     styles+=(3);;
-            underline)  styles+=(4);;
-            -bold|-dim) styles+=(22);;
-            -italic)    styles+=(23);;
-            -underline) styles+=(24);;
-            black)      styles+=(30);;
-            red)        styles+=(31);;
-            green)      styles+=(32);;
-            yellow)     styles+=(33);;
-            blue)       styles+=(34);;
-            magenta)    styles+=(35);;
-            cyan)       styles+=(36);;
-            white)      styles+=(37);;
-            *)          error "argument '$style' is not a valid style";;
+            bold)           styles+=(1);;
+            dim)            styles+=(2);;
+            italic)         styles+=(3);;
+            underline)      styles+=(4);;
+            -bold|-dim)     styles+=(22);;
+            -italic)        styles+=(23);;
+            -underline)     styles+=(24);;
+            black)          styles+=(30);;
+            red)            styles+=(31);;
+            green)          styles+=(32);;
+            yellow)         styles+=(33);;
+            blue)           styles+=(34);;
+            magenta)        styles+=(35);;
+            cyan)           styles+=(36);;
+            white)          styles+=(37);;
+            +*)
+                for (( i=1; i<${#1}; i++)); do
+                    case "${1:$i:1}" in
+                        b)  styles+=(1);;
+                        d)  styles+=(2);;
+                        i)  styles+=(3);;
+                        u)  styles+=(4);;
+                        *)  error "option '+${1:$1:1}' is not a valid style";;
+                    esac
+                done
+                ;;
+            -*)
+                for (( i=1; i<${#1}; i++)); do
+                    case "${1:$i:1}" in
+                        b)  styles+=(22);;
+                        d)  styles+=(22);;
+                        i)  styles+=(23);;
+                        u)  styles+=(24);;
+                        *)  error "option '-${1:$1:1}' is not a valid style";;
+                    esac
+                done
+                ;;
+            *)              error "argument '$style' is not a valid style";;
         esac
     done
 
