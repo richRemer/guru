@@ -187,18 +187,24 @@ style () {
     (IFS=\;; echo -e "\e[${styles[*]}m")
 }
 
+version () {
+    echo "$exe v0.0.0"
+}
+
 usage () {
     echo "Usage:"
     echo "  $exe [<options>]"
     echo "  $exe [<options>] <command> [<command-opts>]"
     echo
     echo "Options recognized:"
-    echo "  --help      Show this help message."
-    echo "  --list      List available commands."
-    echo "  --no-color  Disable color output."
+    echo "  --help          Show this help message."
+    echo "  --list          List available commands."
+    echo "  --no-color      Disable color output."
+    echo "  --prefix=DIR    Set install location. (default /usr/local)"
+    echo "  --version       Print version information."
 }
 
-eval set -- $(getopt -o "" --long help,list,no-color,prefix: -n $exe -- "$@")
+eval set -- $(getopt -o "" --long help,list,no-color,prefix:,version -n $exe -- "$@")
 
 while true; do
     case "$1" in
@@ -207,6 +213,7 @@ while true; do
         --no-color) disable-color;;
         --prefix)   prefix="$2";        shift 2 || error "missing prefix";;
         --prefix=*) prefix="${1#*=}";   shift;;
+        --version)  version;            exit;;
         --)                             shift; break;;
         *)                              break;;
     esac
