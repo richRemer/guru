@@ -221,14 +221,18 @@ done
 
 cmd="$1"
 
-if shift; then
-    if type -p guru-"$cmd" &>/dev/null; then
-        run "$cmd" "$@"
-    else
-        error "'$cmd' is not a $exe command.  Try '$exe --help'."
-    fi
-else
+if ! shift; then
     usage
     echo
     list-commands
+    exit
 fi
+
+if ! type -p guru-"$cmd" &>/dev/null; then
+    error "'$cmd' is not a $exe command.  Try '$exe --help'."
+fi
+
+# this has to go last to ensure it's safe to overwrite this file while it's
+# executing; additional code may be written to end of file but exit will
+# make sure it's never executed
+run "$cmd" "$@"; exit
