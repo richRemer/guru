@@ -24,6 +24,7 @@ declare cmd=
 declare prefix=/usr/local
 declare bin=$(dirname "$0")
 declare lib=$(dirname "$bin")/lib/guru
+declare hook_mandb
 
 detect-color () {
     local colors=$(tput colors 2>/dev/null)
@@ -91,6 +92,11 @@ pkg-install () {
     pkg-install-fs "$pkg_root" "$pkg_spec"
     pkg-install-group "$pkg_root" "$pkg_spec"
     pkg-install-passwd "$pkg_root" "$pkg_spec"
+    pkg-install-man "$pkg_root" "$pkg_spec"
+
+    # TOOD: move this to guru-install so it only runs once
+    pkg-post-install-hooks
+
     echo "$(style green)completed installing $pkg_spec$(style)"
 }
 
@@ -155,15 +161,11 @@ pkg-install-group () {
 
         if test ${#fields[@]} -lt 3 -o ${#fields[@]} -gt 4; then
             echo "$(style red)skipping (invalid)$(style)"
-            #echo "$(style red)skipping invalid '$name' group entry$(style)"
         elif getent group "$name" &>/dev/null; then
             echo "$(style red)skipping (exists)$(style)"
-            #echo "$(style red)skipping existing '$name' group entry$(style)"
         elif test "$pw" != x; then
             echo "$(style red)ignoring password$(style)"
-            #echo "$(style red)ignoring password for '$name'$(style)"
         else
-            #echo "adding entry '$name' to group DB"
             echo
             groupadd -g "$gid" -U "$users" "$name"
         fi
@@ -180,6 +182,27 @@ pkg-install-lib () {
 
     echo "$(style +bu white)installing libraries$(style)"
     cp -vrT "$pkg_root/lib" "$prefix/lib"
+}
+
+pkg-install-man () {
+    local pkg_root="$1"
+    local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
+    local -i section
+    local file
+
+    if ! test -d "$pkg_root/man"; then
+        return
+    fi
+
+    echo "$(style +bu white)installing man pages$(style)"
+    for section in $(seq 1 9); do
+        shopt -s nullglob
+        for file in "$pkg_root/man"/*.$section; do
+            cp -v "$file" "$prefix/share/man/man$section/"
+            hook_mandb=1
+        done
+        shopt -u nullglob
+    done
 }
 
 pkg-install-passwd () {
@@ -209,20 +232,23 @@ pkg-install-passwd () {
 
         if test ${#fields[@]} -ne 7; then
             echo "$(style red)skipping (invalid)$(style)"
-            #echo "$(style red)skipping invalid '$name' passwd entry$(style)"
         elif getent passwd "$name" &>/dev/null; then
             echo "$(style red)skipping (exists)$(style)"
-            #echo "$(style red)skipping existing '$name' passwd entry$(style)"
         elif test "$pw" != x; then
             echo "$(style red)ignoring password$(style)"
-            #echo "$(style red)ignoring password for '$name'$(style)"
         else
-            #echo "adding entry '$name' to passwd DB"
-            #echo "$entry"
             echo
             useradd -u "$uid" -g "$gid" -c "$info" -md "$home" -s "$sh" "$name"
         fi
     done < "$pkg_root/passwd"
+}
+
+pkg-post-install-hooks () {
+    if test -n "$hook_mandb"; then
+        hook_mandb=
+        echo "$(style +bu white)updating man DB$(style)"
+        mandb &>/dev/null
+    fi
 }
 
 pkg-verify () {

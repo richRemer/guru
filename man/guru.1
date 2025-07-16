@@ -1,0 +1,94 @@
+.TH GURU 1 2025-07-16 "Guru Package Manager"
+
+.SH NAME
+
+\fBguru\fR \- simple package manager for gurus
+
+.SH SYNOPSIS
+
+\fBguru\fR [\fIguru-options\fR] \fIcommand\fB [\fIcommand-opts\fR]
+.br
+\fBguru\fR \fB--list\fR
+.br
+\fBguru\fR \fB--help\fR
+
+.SH DESCRIPTION
+
+Tool for installing software conforming to the \fBguru\fR(5) package format.
+
+.SH OPTIONS
+
+.SS Guru options
+
+.TP
+\fB--help\fR
+Display brief help information and exit.
+
+.TP
+\fB--list\fR
+Display list of recognized commands.  This may include built-in commands or
+additional commands installed to the local system.
+
+.TP
+\fB--no-color\fR
+Disable color output.  By default, \fBguru\fR will use ANSI escapes to format
+the command output when connected to a terminal.
+
+.TP
+\fB--prefix\fR \fIDIR\fR
+Set the directory prefix where the package will be installed.  Some packages
+may not respect this setting for all package components.  By default, the
+prefix will be \fB/usr/local\fR.
+
+.TP
+\fB--version\fR
+Display version information and exit.
+
+.SH EXIT STATUS
+
+.TP
+.B 0
+Execution completed successfully.
+
+.TP
+.B 1
+Command failed.  A descriptive error message should be written to STDERR.
+
+.\".SH ENVIRONMENT
+.\"
+.\".TP
+.\".B FOO_BAR
+.\"If $ \fBFOO_BAR\fR is set, this is what it does.
+
+.\".SH FILES
+.\"
+.\".TP
+.\".I /file/path/to/whatever/*.foo
+.\"Brief description of what this file is.  Maybe a reference to \fBfoo\fR(5) for
+.\"more information about foo files.
+
+.\".SH STANDARDS
+.\"List \fBstandards\fR(7) that relate to this command.  Describe any relevant
+.\"details or deviations. Ex: POSIX.1-2001, POSIX.1-2008 ...
+
+.\".SH NOTES
+.\"Some other interesting or useful notes about this command.
+
+.\".SH CAVEATS
+.\"Warnings about some things that aren't bugs or design defects.
+
+.\".SH BUGS
+.\"Bugs, misfeatures, flaws, warts, curses, etc.
+
+.\".SH EXAMPLES
+.\"These examples demonstrate doing things.
+
+.\".SS Thing example
+.\"mans -f --long=foo
+
+.\".SH SEE ALSO
+.\"\fBfoo\fR(1),
+.\"\fBbar\fR(1),
+.\"\fBbaz\fR(5)
+.\".PP
+.\"Perhaps less structured info to use \fBother_command\fR(1) to do things.
