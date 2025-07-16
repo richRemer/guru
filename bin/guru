@@ -198,6 +198,10 @@ pkg-install-man () {
     for section in $(seq 1 9); do
         shopt -s nullglob
         for file in "$pkg_root/man"/*.$section; do
+            if ! test -e "$prefix/share/man/man$section"; then
+                mkdir -p "$prefix/share/man/man$section"
+            fi
+
             cp -v "$file" "$prefix/share/man/man$section/"
             hook_mandb=1
         done
