@@ -229,6 +229,7 @@ pkg-install-passwd () {
     local entry
     local -a fields
     local name pw uid gid gecos home shell
+    local sys
 
     if ! test -f "$pkg_root/passwd"; then
         return
@@ -245,8 +246,11 @@ pkg-install-passwd () {
         info=${fields[4]}
         home=${fields[5]}
         sh=${fields[6]}
+        sys=
 
         echo -n "$entry "
+
+        # TODO: get UID_MIN/UID_MAX from /etc/login.defs
 
         if test ${#fields[@]} -ne 7; then
             echo "$(style red)skipping (invalid)$(style)"
@@ -254,10 +258,14 @@ pkg-install-passwd () {
             echo "$(style red)skipping (exists)$(style)"
         elif test "$pw" != x; then
             echo "$(style red)ignoring password$(style)"
-        else
-            echo
-            useradd -u "$uid" -g "$gid" -c "$info" -md "$home" -s "$sh" "$name"
+        elif test "$uid" -gt 9999; then
+            echo "$(style red)skipping (UID too large)$(style)"
+        elif test "$uid" -lt 1000; then
+            sys=-r
         fi
+
+        echo
+        useradd $sys -u "$uid" -g "$gid" -c "$info" -md "$home" -s "$sh" "$name"
     done < "$pkg_root/passwd"
 }
 
