@@ -26,6 +26,19 @@ declare bin=$(dirname "$0")
 declare lib=$(dirname "$bin")/lib/guru
 declare hook_mandb
 
+bash-complete () {
+    local curr="$2"
+    local prev="$3"
+    local opts='"--help " "--list " "--no-color " "--prefix " "--version "'
+    local cmds=$(compgen -c | grep ^$exe- | cut -d- -f2- \
+        | sed -e s/^/'"'/ -e s/$/' "'/)
+
+    case "${prev}" in
+        --prefix)   compgen -dS / -- "$curr";;
+        *)          compgen -W "$opts $cmds" -- "$curr";;
+    esac
+}
+
 detect-color () {
     local colors=$(tput colors 2>/dev/null)
 
@@ -359,6 +372,13 @@ usage () {
     echo "  --prefix=DIR    Set install location. (default /usr/local)"
     echo "  --version       Print version information."
 }
+
+# auto-completion before getopt mangles args
+if test "$1" = complete; then
+    shift
+    bash-complete "$@"
+    exit
+fi
 
 eval set -- $(getopt -o "" --long help,list,no-color,prefix:,version -n $exe -- "$@")
 
