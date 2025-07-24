@@ -26,6 +26,23 @@ declare bin=$(dirname "$0")
 declare lib=$(dirname "$bin")/lib/guru
 declare hook_mandb
 
+# bash completion function for guru command
+_guru () {
+    {
+        echo -- --
+        echo COMP_CWORD:$COMP_CWORD
+        echo COMP_LINE:$COMP_LINE
+        echo COMP_POINT:$COMP_POINT
+        echo COMP_WORDBREAKS:$COMP_WORDBREAKS
+        echo COMP_WORDS:${COMP_WORDS[@]}
+        echo args:"$@"
+    } >> /tmp/complete
+
+    local curr="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    local opts="--help --list --no-color --prefix --version"
+}
+
 bash-complete () {
     local curr="$2"
     local prev="$3"
