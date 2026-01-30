@@ -1,0 +1,63 @@
+.TH GURU 1 2025-07-16 "Guru Package Manager"
+
+.SH NAME
+
+\fBguru\fR \- package format for Guru Package Manager
+
+.SH SYNOPSIS
+
+The following relative paths have meaning within a Guru package:
+
+\fIpkg\fR/apt, \fIpkg\fR/bin/, \fIpkg\fR/fs/, \fIpkg\fR/group, \fIpkg\fR/lib/,
+\fIpkg\fR/man/, \fIpkg\fR/passwd, \fIpkg\fR/share/, \fIpkg\fR/version
+
+.SH DESCRIPTION
+
+This article describes the layout of a Guru package.  Guru packages can be
+installed using the \fBguru\fR(1) command.
+
+TODO: add info about \fIprefix\fR
+
+.SH FILES
+
+.TP
+\fIpkg\fR/
+Root directory of the package.
+
+.TP
+\fIpkg\fR/apt
+The apt files lists additional package dependencies that must be installed
+using the \fBapt-get\fR(1) command.  If the system does not support
+\fBapt-get\fR, this file is ignored.  The file should contain a list of
+whitespace delimited package names and may include comments starting with '#'.
+
+.TP
+\fIpkg\fR/bin/
+Directory containing executables to be installed.  Files in this directory
+will be installed to \fIprefix\fR/bin/.
+
+.TP
+\fIpkg\fR/lib/
+Directory containing supporting files to be installed.  Files in this
+directory will be installed to \fIprefix\fR/lib/.
+
+.TP
+\fIpkg\fR/man/
+Directory containing man pages to be installed.  Files in this directory that
+match the glob pattern *.[1-9] will be installed to the appropriate man page
+directory.  In addition, if any man pages are installed, the man database will
+be updated during the package installation.
+
+.TP
+\fIpgk\fR/share/
+Directory containing supporting files to be installed.  Files in this
+directory will be installed to \fIprefix\fR/share/.
+
+.TP
+\fIpkg\fR/version (required)
+The version file contains the version specification for the package.  This
+file must be present for the Guru package to be valid, but its contents are
+not defined.
+
+.SH SEE ALSO
+\fBguru\fR(1)
