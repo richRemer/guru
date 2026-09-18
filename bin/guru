@@ -1,5 +1,5 @@
 #!/bin/bash -e
-# Copyright © 2025 Richard Remer
+# Copyright © 2025-2026 Richard Remer
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -114,6 +114,7 @@ pkg-install () {
     pkg-install-fs "$pkg_root" "$pkg_spec"
     pkg-install-group "$pkg_root" "$pkg_spec"
     pkg-install-passwd "$pkg_root" "$pkg_spec"
+    pkg-install-chmod "$pkg_root" "$pkg_spec"
     pkg-install-man "$pkg_root" "$pkg_spec"
 
     # TOOD: move this to guru-install so it only runs once
@@ -145,6 +146,28 @@ pkg-install-bin () {
 
     echo "$(style +bu white)installing binaries$(style)"
     copy-files "$pkg_root/bin" "$prefix/bin"
+}
+
+pkg-install-chmod () {
+    local pkg_root="$1"
+    local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
+    local entry
+    local -a fields
+
+    if ! test -f "$pkg_root/chmod"; then
+        return
+    fi
+
+    echo "$(style +bu white)setting file permissions$(style)"
+
+    while read entry; do
+        read -ra fields <<< "$entry"
+        perm=${fields[0]}
+        path=${fields[1]}
+
+        echo "chmod $perm $path"
+        chmod $perm $path
+    done < "$pkg_root/chmod"
 }
 
 pkg-install-fs () {

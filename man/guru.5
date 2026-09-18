@@ -1,4 +1,4 @@
-.TH GURU 5 2026-09-17 "Guru Package Manager"
+.TH GURU 5 2026-09-18 "Guru Package Manager"
 
 .SH NAME
 
@@ -8,15 +8,16 @@
 
 The following relative paths have meaning within a Guru package:
 
-\fIpkg\fR/apt, \fIpkg\fR/bin/, \fIpkg\fR/fs/, \fIpkg\fR/group, \fIpkg\fR/lib/,
-\fIpkg\fR/man/, \fIpkg\fR/passwd, \fIpkg\fR/share/, \fIpkg\fR/version
+\fIpkg\fR/apt, \fIpkg\fR/bin/, \fIpkg\fR/chmod, \fIpkg\fR/fs/,
+\fIpkg\fR/group, \fIpkg\fR/lib/, \fIpkg\fR/man/, \fIpkg\fR/passwd,
+\fIpkg\fR/share/, \fIpkg\fR/version
 
 .SH DESCRIPTION
 
 This article describes the layout of a Guru package.  Guru packages can be
 installed using the \fBguru\fR(1) command.
 
-TODO: add info about \fIprefix\fR
+TODO: add info about \fIprefix\fR, document fs, group/passwd
 
 .SH FILES
 
@@ -35,6 +36,12 @@ whitespace delimited package names and may include comments starting with '#'.
 \fIpkg\fR/bin/
 Directory containing executables to be installed.  Files in this directory
 will be installed to \fIprefix\fR/bin/.
+
+.TP
+\fIpkg\fR/chmod
+Text file containing file permissions for target system.  Each line must be a
+whitespace delimited sequence of file permissions followed by file paths.  The
+permissions can be in any format accepted by chmod, such as "700" or "g+ws".
 
 .TP
 \fIpkg\fR/lib/
