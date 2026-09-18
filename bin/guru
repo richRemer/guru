@@ -88,6 +88,10 @@ list-commands () {
     compgen -c | grep ^$exe- | cut -d- -f2- | sed -e "s/^/  $exe /"
 }
 
+normalize-data () {
+    sed -e s/^\\s\\+// -e s/\\s\\+$// | grep -v ^\# | grep -v ^$
+}
+
 pkg-fetch () {
     local pkg_spec="$1"
 
@@ -194,7 +198,7 @@ pkg-install-chmod () {
             echo "chgrp $group $path"
             chgrp $group $path
         fi
-    done < "$pkg_root/chmod"
+    done < <(normalize-data < "$pkg_root/chmod")
 }
 
 pkg-install-fs () {
@@ -241,7 +245,7 @@ pkg-install-group () {
             echo
             groupadd -g "$gid" -U "$users" "$name"
         fi
-    done < "$pkg_root/group"
+    done < <(normalize-data < "$pkg_root/group")
 }
 
 pkg-install-lib () {
@@ -324,7 +328,7 @@ pkg-install-passwd () {
 
         echo
         useradd $sys -u "$uid" -g "$gid" -c "$info" -md "$home" -s "$sh" "$name"
-    done < "$pkg_root/passwd"
+    done < <(normalize-data < "$pkg_root/passwd")
 }
 
 pkg-install-share () {
