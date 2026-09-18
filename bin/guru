@@ -39,6 +39,14 @@ bash-complete () {
     esac
 }
 
+copy-file () {
+    cp -v "$1" "$2" | tr -d "'"
+}
+
+copy-files () {
+    cp -vrT "$1" "$2" | tr -d "'"
+}
+
 detect-color () {
     local colors=$(tput colors 2>/dev/null)
 
@@ -136,7 +144,7 @@ pkg-install-bin () {
     fi
 
     echo "$(style +bu white)installing binaries$(style)"
-    cp -vrT "$pkg_root/bin" "$prefix/bin"
+    copy-files "$pkg_root/bin" "$prefix/bin"
 }
 
 pkg-install-fs () {
@@ -148,7 +156,7 @@ pkg-install-fs () {
     fi
 
     echo "$(style +bu white)installing files to root fs$(style)"
-    cp -vrT "$pkg_root/fs" /
+    copy-files "$pkg_root/fs" /
 }
 
 pkg-install-group () {
@@ -195,7 +203,7 @@ pkg-install-lib () {
     fi
 
     echo "$(style +bu white)installing libraries$(style)"
-    cp -vrT "$pkg_root/lib" "$prefix/lib"
+    copy-files "$pkg_root/lib" "$prefix/lib"
 }
 
 pkg-install-man () {
@@ -216,7 +224,7 @@ pkg-install-man () {
                 mkdir -p "$prefix/share/man/man$section"
             fi
 
-            cp -v "$file" "$prefix/share/man/man$section/"
+            copy-file "$file" "$prefix/share/man/man$section/"
             hook_mandb=1
         done
         shopt -u nullglob
@@ -278,7 +286,7 @@ pkg-install-share () {
     fi
 
     echo "$(style +bu white)installing shared resources$(style)"
-    cp -vrT "$pkg_root/share" "$prefix/share"
+    copy-files "$pkg_root/share" "$prefix/share"
 }
 
 pkg-post-install-hooks () {
