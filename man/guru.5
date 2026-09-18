@@ -40,8 +40,11 @@ will be installed to \fIprefix\fR/bin/.
 .TP
 \fIpkg\fR/chmod
 Text file containing file permissions for target system.  Each line must be a
-whitespace delimited sequence of file permissions followed by file paths.  The
-permissions can be in any format accepted by chmod, such as "700" or "g+ws".
+colon-delimited sequence containing the target owner, group, permissions, and
+file path.  Only the file path is required.  Other fields may be left blank.
+
+If the file path begins with a "\fB~\fR", it will be expanded to the install
+prefix (usually \fB/usr/local\fR).
 
 .TP
 \fIpkg\fR/lib/

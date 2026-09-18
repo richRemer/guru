@@ -153,6 +153,7 @@ pkg-install-chmod () {
     local pkg_spec=${2:-$(basename $(realpath "$pkg_root"))}
     local entry
     local -a fields
+    local user group perm path ug
 
     if ! test -f "$pkg_root/chmod"; then
         return
@@ -161,12 +162,38 @@ pkg-install-chmod () {
     echo "$(style +bu white)setting file permissions$(style)"
 
     while read entry; do
-        read -ra fields <<< "$entry"
-        perm=${fields[0]}
-        path=${fields[1]}
+        IFS=: read -ra fields <<< "$entry"
 
-        echo "chmod $perm $path"
-        chmod $perm $path
+        if test ${#fields[@]} -ne 4; then
+            echo "$(style red)skipping (invalid)$(style)"
+            continue
+        fi
+
+        user=${fields[0]}
+        group=${fields[1]}
+        perm=${fields[2]}
+        path=${fields[3]}
+
+        if test "${path:0:1}" == "~"; then
+            path="$prefix${path:1}"
+        fi
+
+        if test "$perm"; then
+            echo "chmod $perm $path"
+            chmod $perm $path
+        fi
+
+        if test "$user"; then
+            ug="$user"
+            if test "$group"; then
+                ug="$user:$group"
+            fi
+            echo "chown $ug $path"
+            chown $ug $path
+        elif test "$group"; then
+            echo "chgrp $group $path"
+            chgrp $group $path
+        fi
     done < "$pkg_root/chmod"
 }
 
