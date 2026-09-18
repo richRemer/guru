@@ -17,7 +17,12 @@ The following relative paths have meaning within a Guru package:
 This article describes the layout of a Guru package.  Guru packages can be
 installed using the \fBguru\fR(1) command.
 
-TODO: add info about \fIprefix\fR, document fs, group/passwd
+When a package is installed using the \fBguru\fR command, the package contents
+are handled based on the names of the FILES (see below).  Many such named
+contents of the package respect the \fIprefix\fR set when invoking the
+\fBguru\fR command with the \fB--prefix=\fR option, which defaults to
+\fB/usr/local\fR.  Other contents, such as a system package manifest, do not
+use this \fIprefix\fR.
 
 .SH FILES
 
@@ -27,24 +32,37 @@ Root directory of the package.
 
 .TP
 \fIpkg\fR/apt
-The apt files lists additional package dependencies that must be installed
+The apt file lists additional package dependencies that must be installed
 using the \fBapt-get\fR(1) command.  If the system does not support
 \fBapt-get\fR, this file is ignored.  The file should contain a list of
 whitespace delimited package names and may include comments starting with '#'.
 
 .TP
 \fIpkg\fR/bin/
-Directory containing executables to be installed.  Files in this directory
-will be installed to \fIprefix\fR/bin/.
+Directory containing executables to install.  Files in this directory will be
+installed to \fIprefix\fR/bin/.
 
 .TP
 \fIpkg\fR/chmod
-Text file containing file permissions for target system.  Each line must be a
-colon-delimited sequence containing the target owner, group, permissions, and
-file path.  Only the file path is required.  Other fields may be left blank.
+A file in the GURU FLAT TEXT DATA FORMAT (see below).  Data lines must contain
+4 fields: owner, group, permissions, and path.  Only the path is required and
+other fields may be left blank.
 
-If the file path begins with a "\fB~\fR", it will be expanded to the install
-prefix (usually \fB/usr/local\fR).
+If the file path begins with a '\fB~\fR' (tilde), it will be expanded to the
+value of \fIprefix\fR (usually \fB/usr/local\fR).
+
+.TP
+\fIpkg\fR/fs/
+Directory containing additional files to install to the target filesystem.
+Unlike most other files in the package, these file paths do not respect
+\fIprefix\fR and will be copied directly to the filesystem root.
+
+.TP
+\fIpkg\fR/group
+A file in the GURU FLAT TEXT DATA FORMAT (see below).  Each entry in the file
+is a local group account to create or add to users.  Data lines must contain
+3-4 fields: name, password (which is ignored), gid, and an optional list of
+comma-delimited usernames.
 
 .TP
 \fIpkg\fR/lib/
@@ -59,6 +77,14 @@ directory.  In addition, if any man pages are installed, the man database will
 be updated during the package installation.
 
 .TP
+\fIpkg\fR/passwd
+A file in the GURU FLAT TEXT DATA FORMAT (see below).  Each entry in the file
+is a local user account to create.  Data lines must contain 7 fields: username,
+password (which is ignored), uid, gid, info (usually used for full name), home
+directory, and shell.  If the UID is less than 1000, the user will be a system
+user.
+
+.TP
 \fIpgk\fR/share/
 Directory containing supporting files to be installed.  Files in this
 directory will be installed to \fIprefix\fR/share/.
@@ -68,6 +94,18 @@ directory will be installed to \fIprefix\fR/share/.
 The version file contains the version specification for the package.  This
 file must be present for the Guru package to be valid, but its contents are
 not defined.
+
+.SH GURU FLAT TEXT DATA FORMAT
+This section describes the \fBguru\fR flat text data format utilized by some
+package components to configure package installation.  Guru flat files are
+UTF-8 encoded and should end in a newline.
+
+The file may contain comment lines beginning with '\fB#\fR'.  These lines, as
+well as empty lines, are ignored.  The remaining lines are data lines.
+
+Data lines are '\fB:\fR' (colon) delimited.  The number of fields specified in
+the data line must match the number of fields expected for the context.  If
+these do not match, the data line will be ignored.
 
 .SH SEE ALSO
 \fBguru\fR(1)
